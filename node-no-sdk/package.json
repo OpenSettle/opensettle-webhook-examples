@@ -1,0 +1,16 @@
+{
+  "name": "opensettle-webhook-example-node-no-sdk",
+  "version": "0.1.0",
+  "description": "Webhook handler example without the SDK — pure Node + Express + HMAC verification.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

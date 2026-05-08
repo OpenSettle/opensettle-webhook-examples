@@ -86,8 +86,23 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
   }
 
   switch (event.type) {
+    // Payments
     case "payment.confirmed":
       console.log("payment.confirmed", event.id, event.data);
+      break;
+    case "payment.failed":
+      console.log("payment.failed", event.id, event.data);
+      break;
+    case "payment.refunded":
+      console.log("payment.refunded", event.id, event.data);
+      break;
+
+    // Subscriptions
+    case "subscription.created":
+      console.log("subscription.created", event.id, event.data);
+      break;
+    case "subscription.trial_ended":
+      console.log("subscription.trial_ended", event.id, event.data);
       break;
     case "subscription.renewed":
       console.log("subscription.renewed", event.id, event.data);
@@ -95,10 +110,21 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
     case "subscription.past_due":
       console.log("subscription.past_due", event.id, event.data);
       break;
+    case "subscription.canceled":
+      console.log("subscription.canceled", event.id, event.data);
+      break;
+
+    // Invoices
     case "invoice.paid":
       console.log("invoice.paid", event.id, event.data);
       break;
+    case "invoice.past_due":
+      console.log("invoice.past_due", event.id, event.data);
+      break;
+
     default:
+      // Unknown event type — return 200 anyway so OpenSettle doesn't
+      // retry. New event types are added over time.
       console.log("unhandled event", event.type);
   }
 

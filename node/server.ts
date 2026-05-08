@@ -34,16 +34,38 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
       data: Record<string, unknown>;
       created: string;
     }>({
-      rawBody: req.body, // Buffer when express.raw() is in use
+      // express.raw() puts a Buffer on req.body — decode to UTF-8 so the
+      // HMAC compare runs on the exact characters OpenSettle signed.
+      rawBody: (req.body as Buffer).toString("utf8"),
       signatureHeader: req.header("x-opensettle-signature"),
       secret: SECRET,
       // tolerance: 300, // override default (300s = 5 min) here if needed
     });
 
     switch (data.type) {
+      // Payments
       case "payment.confirmed":
         // Mark the order paid, grant access, send the receipt, etc.
         console.log("payment.confirmed", data.id, data.data);
+        break;
+      case "payment.failed":
+        console.log("payment.failed", data.id, data.data);
+        break;
+      case "payment.refunded":
+        // Revoke / adjust access.
+        console.log("payment.refunded", data.id, data.data);
+        break;
+
+      // Subscriptions — `subscription.created` carries the full subscription
+      // object on `data.data.subscription`. The lifecycle events below carry
+      // a minimal `{ subscriptionId, [nextBillingDate], [reason], metadata }`
+      // payload — enough to recover any identifiers you stashed in the
+      // checkout's `metadata` without a database lookup.
+      case "subscription.created":
+        console.log("subscription.created", data.id, data.data);
+        break;
+      case "subscription.trial_ended":
+        console.log("subscription.trial_ended", data.id, data.data);
         break;
       case "subscription.renewed":
         console.log("subscription.renewed", data.id, data.data);
@@ -51,9 +73,18 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
       case "subscription.past_due":
         console.log("subscription.past_due", data.id, data.data);
         break;
+      case "subscription.canceled":
+        console.log("subscription.canceled", data.id, data.data);
+        break;
+
+      // Invoices
       case "invoice.paid":
         console.log("invoice.paid", data.id, data.data);
         break;
+      case "invoice.past_due":
+        console.log("invoice.past_due", data.id, data.data);
+        break;
+
       default:
         // Unknown event type — return 200 anyway so OpenSettle doesn't
         // retry. New event types are added over time; reject here only

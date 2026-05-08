@@ -16,17 +16,13 @@ This repo is a copy-paste reference for getting that right.
 
 ## Examples
 
-| Language | Path | Status |
+| Language | Path | Notes |
 |---|---|---|
-| Node.js (TypeScript) | [`node/`](./node) | ✅ Complete, uses `@opensettle/sdk` |
-| Node.js (no SDK) | [`node-no-sdk/`](./node-no-sdk) | ✅ Complete, no dependency |
-| Python | [`python/`](./python) | 🚧 Coming next |
-| PHP | [`php/`](./php) | 🚧 Coming next |
-| Go | [`go/`](./go) | 🚧 Coming next |
+| Node.js (TypeScript) | [`node/`](./node) | Uses `@opensettle/sdk` — idiomatic, fewer lines |
+| Node.js (no SDK) | [`node-no-sdk/`](./node-no-sdk) | Zero-dependency. Read the math, copy into your codebase, never look at it again |
 
-The two Node examples cover the common cases: with the official SDK
-(idiomatic, fewer lines) and without (zero-dependency, useful when you
-want to see exactly what's happening on the wire).
+Python, PHP, and Go ports will land here when they exist — the file
+listing above is the source of truth.
 
 ## Signature format
 
@@ -62,15 +58,30 @@ Configure raw-body access on the webhook route only:
 app.use("/webhook", express.raw({ type: "application/json" }));
 ```
 
-```python
-# Flask
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    raw = request.get_data()  # bytes; not request.json
-    ...
-```
+The Node examples in this repo use the snippet above. When ports for
+other frameworks land, each will document its own raw-body incantation.
 
-Each example includes its own framework's incantation for this.
+## Webhook events you'll receive
+
+| Event | When OpenSettle emits it | Acceptable handler action |
+|---|---|---|
+| `payment.confirmed` | On-chain payment reached the configured confirmation threshold | Mark the order paid, fulfil it, send a receipt |
+| `payment.failed` | A pending checkout / payment timed out or the chain reverted | Notify the buyer, offer a retry |
+| `payment.refunded` | Refund tx confirmed on-chain | Revoke / adjust access |
+| `subscription.created` | New subscription activated. `data.subscription` is the full record | Activate access, store the subscription id |
+| `subscription.trial_ended` | Trial finished and the first paid period started | No-op for most apps; useful for analytics |
+| `subscription.renewed` | Recurring period renewed. `data.nextBillingDate` is set | Extend access through the new period |
+| `subscription.past_due` | Renewal payment failed; dunning started | Optional: warn the customer |
+| `subscription.canceled` | Subscription cancelled. `data.reason` is set when known | Revoke access (or schedule revocation if you cancel at period end) |
+| `invoice.paid` | An invoice transitioned to paid | Issue receipt / unlock invoiced goods |
+| `invoice.past_due` | An invoice's due date passed without payment | Optional: collections / dunning |
+
+The lifecycle events (`subscription.trial_ended`, `subscription.renewed`,
+`subscription.past_due`, `subscription.canceled`) carry a minimal payload
+of `{ subscriptionId, [nextBillingDate], [reason], metadata }`. Stash any
+identifiers you'll want to recover (your own `userId`, `planId`, …) in
+the checkout's `metadata` — OpenSettle copies it to the subscription and
+includes it on every lifecycle event, so you don't need a DB lookup.
 
 ## Testing locally
 

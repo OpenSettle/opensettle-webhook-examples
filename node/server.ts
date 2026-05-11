@@ -55,6 +55,20 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
         // Revoke / adjust access.
         console.log("payment.refunded", data.id, data.data);
         break;
+      case "payment.reorg_suspected":
+        // Early-warning signal: the original block hash for a confirmed
+        // payment no longer matches the canonical chain. Status is still
+        // `confirmed` — wait for `payment.reorged` (deep reorg confirmed)
+        // or no further event (chain re-included the block).
+        console.log("payment.reorg_suspected", data.id, data.data);
+        break;
+      case "payment.reorged":
+        // Deep reorg confirmed by an OpenSettle operator. Payment status
+        // is now `reorged`. Decide your refund / fulfilment-rollback
+        // policy. data.data.metadata includes `reorgedAt` + optional
+        // `reorgReason`.
+        console.log("payment.reorged", data.id, data.data);
+        break;
 
       // Subscriptions — `subscription.created` carries the full subscription
       // object on `data.data.subscription`. The lifecycle events below carry

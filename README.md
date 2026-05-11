@@ -68,6 +68,8 @@ other frameworks land, each will document its own raw-body incantation.
 | `payment.confirmed` | On-chain payment reached the configured confirmation threshold | Mark the order paid, fulfil it, send a receipt |
 | `payment.failed` | A pending checkout / payment timed out or the chain reverted | Notify the buyer, offer a retry |
 | `payment.refunded` | Refund tx confirmed on-chain | Revoke / adjust access |
+| `payment.reorg_suspected` | Reorg-afterglow sweep detected the original block hash for a confirmed payment no longer matches the canonical chain. **Status is still `confirmed`** — this is an early-warning signal, not a state change | Mark the order under-review in your dashboard. Wait for the follow-up: either a `payment.reorged` (deep reorg confirmed) or no further event (chain re-included the block; resume normal processing) |
+| `payment.reorged` | An OpenSettle operator has confirmed the deep reorg and flipped the payment to `status: "reorged"`. The original tx is gone from the canonical chain | Decide your refund / fulfilment-rollback policy. The payment.metadata includes `reorgedAt` and an optional `reorgReason` |
 | `subscription.created` | New subscription activated. `data.subscription` is the full record | Activate access, store the subscription id |
 | `subscription.trial_ended` | Trial finished and the first paid period started | No-op for most apps; useful for analytics |
 | `subscription.renewed` | Recurring period renewed. `data.nextBillingDate` is set | Extend access through the new period |

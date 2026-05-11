@@ -96,6 +96,15 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
     case "payment.refunded":
       console.log("payment.refunded", event.id, event.data);
       break;
+    case "payment.reorg_suspected":
+      // Early-warning signal: status is still `confirmed`. Wait for
+      // payment.reorged or no further event.
+      console.log("payment.reorg_suspected", event.id, event.data);
+      break;
+    case "payment.reorged":
+      // Deep reorg confirmed by an OpenSettle operator.
+      console.log("payment.reorged", event.id, event.data);
+      break;
 
     // Subscriptions
     case "subscription.created":

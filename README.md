@@ -107,4 +107,4 @@ signature. Use it to verify the handler before any real traffic hits.
 
 If you find a bug in the verification logic, please don't open a public
 issue — report via [opensettle.io/security](https://opensettle.io/security)
-or [opensettle@proton.me](mailto:opensettle@proton.me).
+or [OpenSettle@proton.me](mailto:OpenSettle@proton.me).

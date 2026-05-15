@@ -31,8 +31,9 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
     const { data } = verifyWebhook<{
       id: string;
       type: string;
+      livemode: boolean;
+      created_at: string;
       data: Record<string, unknown>;
-      created: string;
     }>({
       // express.raw() puts a Buffer on req.body — decode to UTF-8 so the
       // HMAC compare runs on the exact characters OpenSettle signed.
@@ -43,6 +44,13 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
     });
 
     switch (data.type) {
+      // Synthetic event emitted by the dashboard's "send test" button and the
+      // POST /webhook_endpoints/:id/test API. Same signature path, no business
+      // side-effects — handy for confirming the handler is wired up.
+      case "webhook.endpoint.test":
+        console.log("webhook.endpoint.test", data.id, data.data);
+        break;
+
       // Payments
       case "payment.confirmed":
         // Mark the order paid, grant access, send the receipt, etc.

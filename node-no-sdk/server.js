@@ -86,6 +86,13 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
   }
 
   switch (event.type) {
+    // Synthetic event emitted by the dashboard's "send test" button and the
+    // POST /webhook_endpoints/:id/test API. Same signature path, no business
+    // side-effects — handy for confirming the handler is wired up.
+    case "webhook.endpoint.test":
+      console.log("webhook.endpoint.test", event.id, event.data);
+      break;
+
     // Payments
     case "payment.confirmed":
       console.log("payment.confirmed", event.id, event.data);

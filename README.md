@@ -96,8 +96,10 @@ curl -X POST \
   https://api.opensettle.io/v1/workspaces/$WS/webhook_endpoints/$ENDPOINT_ID/test
 ```
 
-You'll get a synthetic `payment.confirmed` event delivered with a real
-signature. Use it to verify the handler before any real traffic hits.
+You'll get a `webhook.endpoint.test` event delivered with a real
+signature — body shape is `{ id, type: "webhook.endpoint.test",
+livemode, created_at, data: { endpointId, sentAt, source } }`. Use it
+to confirm the verification path works before any real traffic hits.
 
 ## License
 

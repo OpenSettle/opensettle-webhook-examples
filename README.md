@@ -109,4 +109,4 @@ to confirm the verification path works before any real traffic hits.
 
 If you find a bug in the verification logic, please don't open a public
 issue — report via [opensettle.io/security](https://opensettle.io/security)
-or [OpenSettle@proton.me](mailto:OpenSettle@proton.me).
+or [security@opensettle.io](mailto:security@opensettle.io).

@@ -78,9 +78,11 @@ other frameworks land, each will document its own raw-body incantation.
 | `invoice.paid` | An invoice transitioned to paid | Issue receipt / unlock invoiced goods |
 | `invoice.past_due` | An invoice's due date passed without payment | Optional: collections / dunning |
 
-The lifecycle events (`subscription.trial_ended`, `subscription.renewed`,
-`subscription.past_due`, `subscription.canceled`) carry a minimal payload
-of `{ subscriptionId, [nextBillingDate], [reason], metadata }`. Stash any
+The lifecycle events `subscription.trial_ended`, `subscription.renewed`,
+and `subscription.past_due` carry a minimal payload of
+`{ subscriptionId, [nextBillingDate], metadata }`. `subscription.canceled`
+instead carries the full record on `data.subscription` plus a `data.reason`
+(the same shape as `subscription.created`). Stash any
 identifiers you'll want to recover (your own `userId`, `planId`, …) in
 the checkout's `metadata` — OpenSettle copies it to the subscription and
 includes it on every lifecycle event, so you don't need a DB lookup.

@@ -72,17 +72,21 @@ other frameworks land, each will document its own raw-body incantation.
 | `payment.reorged` | An OpenSettle operator has confirmed the deep reorg and flipped the payment to `status: "reorged"`. The original tx is gone from the canonical chain | Decide your refund / fulfilment-rollback policy. The payment.metadata includes `reorgedAt` and an optional `reorgReason` |
 | `subscription.created` | New subscription activated. `data.subscription` is the full record | Activate access, store the subscription id |
 | `subscription.trial_ended` | Trial finished and the first paid period started | No-op for most apps; useful for analytics |
-| `subscription.renewed` | Recurring period renewed. `data.nextBillingDate` is set | Extend access through the new period |
+| `subscription.renewed` | Renewal payment confirmed. `data.subscription` is the full record + `data.invoice` is the paid renewal invoice (flat `data.subscriptionId` / `data.nextBillingDate` also present) | Extend access through the new period |
 | `subscription.past_due` | Renewal payment failed; dunning started | Optional: warn the customer |
 | `subscription.canceled` | Subscription cancelled. `data.reason` is set when known | Revoke access (or schedule revocation if you cancel at period end) |
 | `invoice.paid` | An invoice transitioned to paid | Issue receipt / unlock invoiced goods |
 | `invoice.past_due` | An invoice's due date passed without payment | Optional: collections / dunning |
 
-The lifecycle events `subscription.trial_ended`, `subscription.renewed`,
-and `subscription.past_due` carry a minimal payload of
-`{ subscriptionId, [nextBillingDate], metadata }`. `subscription.canceled`
-instead carries the full record on `data.subscription` plus a `data.reason`
-(the same shape as `subscription.created`). Stash any
+The lifecycle events `subscription.trial_ended` and `subscription.past_due`
+carry a minimal payload of `{ subscriptionId, metadata }`.
+`subscription.renewed` ships an **additive superset**:
+`{ subscription, invoice, subscriptionId, nextBillingDate, metadata }` —
+prefer `data.subscription` (the full record) and `data.invoice` (the paid
+renewal invoice), but the flat `data.subscriptionId` / `data.nextBillingDate`
+fields remain for backward compatibility. `subscription.created` carries the
+full record on `data.subscription`; `subscription.canceled` carries
+`data.subscription` plus a `data.reason`. Stash any
 identifiers you'll want to recover (your own `userId`, `planId`, …) in
 the checkout's `metadata` — OpenSettle copies it to the subscription and
 includes it on every lifecycle event, so you don't need a DB lookup.

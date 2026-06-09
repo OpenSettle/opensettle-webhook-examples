@@ -78,11 +78,14 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
         console.log("payment.reorged", data.id, data.data);
         break;
 
-      // Subscriptions — `subscription.created` carries the full subscription
-      // object on `data.data.subscription`. The lifecycle events below carry
-      // a minimal `{ subscriptionId, [nextBillingDate], [reason], metadata }`
-      // payload — enough to recover any identifiers you stashed in the
-      // checkout's `metadata` without a database lookup.
+      // Subscriptions — `subscription.created` and `subscription.canceled`
+      // carry the full subscription object on `data.data.subscription`
+      // (`canceled` adds `data.data.reason`). `subscription.renewed` ships an
+      // additive superset: `{ subscription, invoice, subscriptionId,
+      // nextBillingDate, metadata }` — prefer `subscription` + `invoice`, the
+      // flat fields remain for compatibility. `trial_ended` / `past_due` carry
+      // a minimal `{ subscriptionId, metadata }`. The `metadata` you stashed on
+      // the checkout rides along on every event, so no database lookup needed.
       case "subscription.created":
         console.log("subscription.created", data.id, data.data);
         break;

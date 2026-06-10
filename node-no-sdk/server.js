@@ -112,6 +112,12 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
       // Deep reorg confirmed by an OpenSettle operator.
       console.log("payment.reorged", event.id, event.data);
       break;
+    case "payment.reversed":
+      // Authoritative on-chain rollback — settlement is no longer on the
+      // canonical chain (fires alongside / instead of payment.reorged). If you
+      // already fulfilled this payment, de-provision / cancel / claw back here.
+      console.log("payment.reversed", event.id, event.data);
+      break;
 
     // Subscriptions
     case "subscription.created":

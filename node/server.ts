@@ -77,6 +77,14 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
         // `reorgReason`.
         console.log("payment.reorged", data.id, data.data);
         break;
+      case "payment.reversed":
+        // Authoritative on-chain rollback — the reorg-afterglow sweep confirmed
+        // the settlement is no longer on the canonical chain (fires alongside /
+        // instead of `payment.reorged`). If you already shipped goods or granted
+        // access for this payment, THIS is your trigger to recover: de-provision,
+        // cancel the order, claw back.
+        console.log("payment.reversed", data.id, data.data);
+        break;
 
       // Subscriptions — `subscription.created` and `subscription.canceled`
       // carry the full subscription object on `data.data.subscription`

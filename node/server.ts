@@ -118,6 +118,24 @@ app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
         console.log("invoice.past_due", data.id, data.data);
         break;
 
+      // Affiliate commissions (non-custodial ledger — no funds move through
+      // OpenSettle). `accrued` = a partner commission was recorded on a
+      // settled, affiliate-attributed sale; `adjusted` = it was reduced after a
+      // partial refund; `paid` = the merchant marked an owed commission paid
+      // out; `voided` = it was canceled after a full refund or reorg.
+      case "commission.accrued":
+        console.log("commission.accrued", data.id, data.data);
+        break;
+      case "commission.adjusted":
+        console.log("commission.adjusted", data.id, data.data);
+        break;
+      case "commission.paid":
+        console.log("commission.paid", data.id, data.data);
+        break;
+      case "commission.voided":
+        console.log("commission.voided", data.id, data.data);
+        break;
+
       default:
         // Unknown event type — return 200 anyway so OpenSettle doesn't
         // retry. New event types are added over time; reject here only

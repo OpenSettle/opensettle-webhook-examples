@@ -78,6 +78,10 @@ other frameworks land, each will document its own raw-body incantation.
 | `subscription.canceled` | Subscription cancelled. `data.reason` is set when known | Revoke access (or schedule revocation if you cancel at period end) |
 | `invoice.paid` | An invoice transitioned to paid | Issue receipt / unlock invoiced goods |
 | `invoice.past_due` | An invoice's due date passed without payment | Optional: collections / dunning |
+| `commission.accrued` | A partner commission was recorded on a settled, affiliate-attributed sale (non-custodial ledger entry — no funds move) | Optional: reflect the owed commission in your partner dashboard |
+| `commission.adjusted` | A partner commission was reduced after the underlying sale was partially refunded | Optional: lower the owed commission in your partner dashboard |
+| `commission.paid` | The merchant marked an owed commission paid out | Optional: mark the partner payout settled in your records |
+| `commission.voided` | A partner commission was canceled because the underlying sale was fully refunded or reorged out | Optional: clear the owed commission in your partner dashboard |
 
 The lifecycle events `subscription.trial_ended` and `subscription.past_due`
 carry a minimal payload of `{ subscriptionId, metadata }`.
